@@ -2,6 +2,13 @@
 @section('title')@lang('quickadmin.user-management.title')@endsection
 @section('customCss')
 <meta name="csrf-token" content="{{ csrf_token() }}" >
+<style>
+    .dataTables_scrollBody  thead th{    opacity: 0;
+        height: 0;
+        padding: 0 !important;
+        border: none !important;
+    }
+</style>
 @endsection
 
 @section('main-content')
