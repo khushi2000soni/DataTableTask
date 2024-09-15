@@ -12,12 +12,8 @@ use Yajra\DataTables\Html\Editor\Editor;
 use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
-
 class UserDataTable extends DataTable
 {
-    private $offset = 0; // Stores the current offset for pagination
-    private $offsetStep = 20;
-
     /**
      * Build the DataTable class.
      *
@@ -51,6 +47,7 @@ class UserDataTable extends DataTable
             })
             ->rawColumns(['action']);
     }
+    
 
     /**
      * Get the query source of dataTable.
@@ -79,11 +76,6 @@ class UserDataTable extends DataTable
            $query = $query->searchByCreatedAt(request()->created_at);
         }
 
-        
-        $start = request()->input('start', 0);
-        $length = request()->input('length', 20);
-        $query->skip($start)->take($length);
-
         return $this->applyScopes($query);
     }
 
@@ -98,16 +90,22 @@ class UserDataTable extends DataTable
             ->setTableId('users-table')
             ->parameters([
                 'responsive' => false,
-                'serverSide' => true,            
-                'processing' => true,            
-                'pageLength' => 20,              
-                'searching' => true,             
-                'scroller' => true,
-                'paging' => true,                
-                'lengthMenu' => [20],            
-                'scrollY' => '500px',     
-                'scrollCollapse' => true, 
-                'dom' => 'rt',
+                'pageLength' => 15,
+                'searching' => true,
+                'lengthChange' => false,
+                'scrollX' => true,
+                'scrollY' => '780px',
+                'scrollCollapse' => true,
+                'paging' => false,
+                'ajax' => [
+                    'url' => route('user.index'),
+                    'type' => 'POST',
+                    'data' => function ($params) {
+                        $params['start'] = $params['start'];
+                        $params['length'] = 15;
+                        return $params;
+                    },
+                ],                                    
                 'initComplete' => "function() { 
                     var api = this.api();                                    
                     var searchRow = $('<tr></tr>').appendTo('.dataTable thead');                    
@@ -140,15 +138,17 @@ class UserDataTable extends DataTable
                         }
                         $(searchInput).appendTo(searchRow.append('<th></th>').find('th').eq(index));
                     });
-                }",                 
+                }",
             ])
             ->columns($this->getColumns())
             ->minifiedAjax()
+            ->dom('rt')
             ->orderBy(2,'asc')
             ->selectStyleSingle();
     }
      
-    
+
+
     /**
      * Get the dataTable columns definition.
      */
